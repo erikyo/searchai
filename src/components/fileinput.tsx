@@ -1,18 +1,19 @@
-import React, {Ref, useRef} from "react";
+import React, {useRef} from "react";
 import {parseFileData} from "../ml/utils.ts";
 
 export function Upload({ setWords, uploadCallback }: { setWords: Function, uploadCallback: Function }) {
-  const fileRef  = useRef() as Ref<HTMLInputElement>;
+  const fileRef  = useRef<HTMLInputElement>(null);
 
-  const readFile = (event: Event) => {
+  const readFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const fileReader = new FileReader();
     if (event.target === null) {
       return
     }
     const { files } = event.target;
 
+    // @ts-ignore
     fileReader.readAsText(files[0], "UTF-8");
-    fileReader.onload = e => {
+    fileReader.onload = (e: ProgressEvent<FileReader>) => {
       const words = parseFileData(e.target?.result as string)
       console.log(words);
       setWords(words);

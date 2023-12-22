@@ -4,8 +4,8 @@ import {ALPHA_LEN, BATCHSIZE, EPOCHS, MAXLEN, setStatus} from '../const.ts'
 import type {Tensor} from "@tensorflow/tfjs-core";
 import type {Rank, Sequential} from "@tensorflow/tfjs";
 
-export async function create_model (currentModel) {
-  await currentModel.add(tf.layers.lstm({
+export async function create_model (currentModel: Sequential) {
+  currentModel.add(tf.layers.lstm({
     units: ALPHA_LEN * 2,
     inputShape: [MAXLEN, ALPHA_LEN],
     dropout: 0.2,
@@ -14,10 +14,9 @@ export async function create_model (currentModel) {
     returnSequences: true,
     activation: 'relu'
   }))
-  await currentModel.add(tf.layers.timeDistributed({
+  currentModel.add(tf.layers.timeDistributed({
     layer: tf.layers.dense({
       units: ALPHA_LEN,
-      dropout: 0.2,
       activation: 'softmax'
     })
   }))

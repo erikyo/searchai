@@ -12,9 +12,7 @@ export function parseFileData(result: string) {
   }
 }
 
-export function wordToInt (word: string, max_len: number): number[] {
-  // char [] = word
-  // int = MAXLEN
+export function splitToInt (word: string, max_len: number): number[] {
   const encode = []
   for (let i = 0; i < max_len; i++) {
     if (i < word.length) {
@@ -26,9 +24,7 @@ export function wordToInt (word: string, max_len: number): number[] {
   }
   return encode
 }
-export function intToWord (word: number[], max_len: number): any[] {
-  // int [] = word
-  // int = MAXLEN
+export function recomposeWord (word: number[], max_len: number): string[] {
   const decode: string[] = []
   for (let i = 0; i < max_len; i++) {
     if (word[i] == 0) {

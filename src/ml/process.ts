@@ -1,8 +1,10 @@
 import { create_model, trainModel } from './model.ts'
 import { filterWordlist, wordToInt, padWords, safeTrainingSize, oneHotEncode} from "./preProcess.ts";
 import { oneHotDecode, intToWords} from "./postProcess.ts";
+import {Rank, Sequential} from "@tensorflow/tfjs";
+import {Tensor} from "@tensorflow/tfjs-core";
 
-export async function train(words, SAMPLELEN, MAXLEN, ALPHA_LEN, model, setModel) {
+export async function aiTrain(words: string[], model: Sequential, setModel: (value: (((prevState: Sequential) => Sequential) | Sequential)) => void) {
   const filtered_words = filterWordlist(words)
   const int_words = wordToInt(filtered_words)
   const train_features = padWords(int_words)
@@ -19,15 +21,13 @@ export async function train(words, SAMPLELEN, MAXLEN, ALPHA_LEN, model, setModel
   trained_labels.dispose()
 }
 
-
-export function predict(value, SAMPLELEN, MAXLEN, ALPHA_LEN, model) {
+export function aiPredict(value: any, model: Sequential) {
   console.log(value)
-  let pred_features = []
+  let pred_features: string[] = []
   pred_features.push(value)
   pred_features = wordToInt(pred_features)
-  pred_features = oneHotEncode(pred_features)
-  let pred_labels = model.predict(pred_features)
-  pred_labels = oneHotDecode(pred_labels)
-  pred_labels = intToWords(pred_labels)[0]
-  return pred_labels
+  const encoded = oneHotEncode(pred_features)
+  const pred_labels = model.predict(encoded)
+  const decoded = oneHotDecode(pred_labels as Tensor<Rank>)
+  return intToWords(decoded as unknown as string[])[0]
 }

@@ -1,15 +1,17 @@
 import {MAXLEN} from "../const.ts";
-import {intToWord} from "./utils.ts";
+import {recomposeWord} from "./utils.ts";
+import {Tensor} from "@tensorflow/tfjs-core";
+import {Rank} from "@tensorflow/tfjs";
 
-export function oneHotDecode (words) {
-  // function to decode onehot encoding
+export function oneHotDecode (words: Tensor<Rank>) {
   return words.argMax(-1).arraySync()
 }
-export function intToWords(words){
-  //function to convert int to words
-  let results = [];
+
+export function intToWords(words: string[]): string[][] {
+  const results = [];
   for (const i in words){
-    results.push(intToWord(words[i],MAXLEN));
+    // @ts-ignore
+    results.push(recomposeWord(words[i],MAXLEN));
   }
   return results;
 }
