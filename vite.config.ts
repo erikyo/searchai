@@ -6,15 +6,25 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      strategies: 'injectManifest',
+      srcDir: 'src/sw',
+      filename: 'worker.ts',
       devOptions: {
-        enabled: true
+        enabled: true,
+        type: 'module',
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'pwa-maskable-192x192.png'],
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html}'],
+      },
+      includeAssets: ['index.html','favicon.ico', 'apple-touch-icon.png', 'pwa-maskable-192x192.png'],
       manifest: {
         name: 'My Awesome App',
         short_name: 'MyApp',
+        display: "standalone",
         description: 'My Awesome App description',
         theme_color: '#ffffff',
+        background_color: "#FFFFFF",
         icons: [
           {
             src: "/pwa-192x192.png",
@@ -41,9 +51,6 @@ export default defineConfig({
             purpose: "maskable"
           }
         ],
-        start_url: "/",
-        display: "standalone",
-        background_color: "#FFFFFF"
       }
     })
   ],

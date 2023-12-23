@@ -26,6 +26,7 @@ export function parseFileData(result: string): string[] {
   // Remove duplicates by converting to a Set and back to an array
   return Array.from(new Set(cleanedWords));
 }
+
 export function recomposeWord (word: number[], max_len: number): string[] {
   const decode: string[] = []
   for (let i = 0; i < max_len; i++) {

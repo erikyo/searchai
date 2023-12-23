@@ -1,32 +1,29 @@
 import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching';
 import { clientsClaim } from 'workbox-core';
 import { registerRoute, NavigationRoute } from 'workbox-routing';
-import * as USE from "universal-sentence-encoder";
+import * as USE from "universal-sentence-encoder-alt";
 import {aiPredict} from "../ml/process.ts";
 
-declare let self: ServiceWorkerGlobalScope;
+declare let self: ServiceWorkerGlobalScope
 
-// self.__WB_MANIFEST is the default injection point
-precacheAndRoute(self.__WB_MANIFEST);
+// Load the Universal Sentence Encoder model
+let useModel: USE.UniversalSentenceEncoder | null = null;
 
 // Clean old assets
 cleanupOutdatedCaches();
 
-let allowlist: undefined | RegExp[];
-if (import.meta.env.DEV) {
-  allowlist = [/^\/$/];
-}
+// self.__WB_MANIFEST is the default injection point
+precacheAndRoute(self.__WB_MANIFEST)
+
+let allowlist: undefined | RegExp[]
+if (import.meta.env.DEV)
+  allowlist = [/^\/$/]
 
 // To allow work offline
-registerRoute(
-  new NavigationRoute(
-    createHandlerBoundToURL('index.html'),
-    { allowlist }
-  )
-);
-
-// Load the Universal Sentence Encoder model
-let useModel: USE.UniversalSentenceEncoder | null = null;
+registerRoute(new NavigationRoute(
+  createHandlerBoundToURL('index.html'),
+  { allowlist },
+))
 
 // Note: You might want to adjust the model loading strategy
 // to make it more efficient in a service worker context.
@@ -40,17 +37,21 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   // Claim clients to ensure that updates are applied immediately
-  event.waitUntil(clientsClaim());
+  clientsClaim()
 });
 
 self.addEventListener('message', async (event) => {
   const type = event.data.type;
   let results = {};
 
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+
   // Handle the model initialization
   if (type === "init") {
     if (useModel) {
-      useModel.embed(event.data.words);
+      await useModel.embed(event.data.words);
       results = { newDataset: event.data.words };
     } else {
       results = { error: 'Model not loaded' };

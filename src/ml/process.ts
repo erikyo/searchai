@@ -1,6 +1,6 @@
-import * as tf from '@tensorflow/tfjs';
-import * as USE from "universal-sentence-encoder";
+import * as USE from "universal-sentence-encoder-alt";
 import { cosineSimilarity } from './utils';
+
 export async function aiPredict(value: string, words: string[], model: USE.UniversalSentenceEncoder, threshold = 0.7) {
   // Split the value into words
   const valueWords = value.split(' ');

@@ -1,59 +1,52 @@
-import {useEffect, useState} from 'react'
-import './style/App.css'
+import {useState} from 'react'
 import {Upload} from "./components/fileinput.tsx";
 import {parseFileData} from "./ml/utils.ts";
-import { useRegisterSW } from 'virtual:pwa-register/react'
-import { pwaInfo } from 'virtual:pwa-info'
-
-console.log(pwaInfo)
+import {useRegisterSW} from "virtual:pwa-register/react";
 
 function App() {
   const [predictions, setPredictions] = useState([])
   const [words, setWords] = useState([])
   const [status, setStatus] = useState('ready')
-  const [SW, setSW] = useState(null) as ServiceWorkerRegistration
+  const [SW, setSW] = useState()
 
-  useRegisterSW(
-    {
-      onRegisteredSW(swUrl, registration) {
-        console.log('SW Registered: ', swUrl)
-        if (registration?.active)
-          setSW(registration.active)
-      },
-      onRegisterError(error) {
-        console.log('SW registration error: ', error)
-      },
-    }
-  )
+// Register the custom service worker
+  useRegisterSW({
+    onNeedRefresh() {
+      setStatus('✳️ Refreshing service worker')
+    },
+    onRegisteredSW(swUrl, registration) {
+      if (registration?.active) {
+        setSW(registration.active)
 
+        // Handle messages from the service worker
+        SW.addEventListener('message', (event) => {
+          const {type, results} = event.data;
+
+          if (type === 'predictionResult') {
+            setPredictions(event.data.results.predictions)
+          } else if (type === 'modelUpdate') {
+            console.log('Model updated')
+          }
+        });
+      }
+    },
+  })
 
 // Function to call the worker
-  function handlePrediction(value, words) {
-    SW.postMessage({type: "predict", value, words})
+  async function handlePrediction(value, words) {
+    const prediction = await SW.postMessage({type: "predict", value, words})
+    setPredictions(prediction.results)
   }
 
-  function updateWorkerModel(words) {
-    SW.postMessage({type: "init", words})
+  async function updateWorkerModel(words) {
+    await SW.postMessage({type: "init", words})
+    setWords(words)
   }
 
-  useEffect(() => {
-    if(SW) SW.onmessage( async (event) => {
-      const { type, results } = event.data
-      if (type === "predict") {
-        setPredictions(results)
-      }
-      if (type === "init") {
-        setWords(results)
-        updateWorkerModel(results)
-        setStatus('ready')
-      }
-    })
-  }, [SW])
 
-  // @ts-ignore
   return (
-    <div className={' container my-12 flex flex-col w-9/12 content-center justify-center mx-auto'}>
-      <div className={'h-56 w-4/12 mx-auto'}>
+    <div className={' container mt-20 flex flex-col w-9/12 content-center justify-center mx-auto'}>
+      <div className={'h-64 w-4/12 mx-auto'}>
         <div className={' text-center'}>
           <h1 className={"text-5xl font-bold "}>Search autocomplete</h1>
           <p>Upload a text file to predict the next word</p>
@@ -90,12 +83,12 @@ function App() {
 
       </div>
 
-      <button className={'w-4/12 button button--primary border border-gray-200 text-gray-900 rounded py-2 px-4 mx-auto'}>
+      <button className={'w-4/12 button button--primary border border-gray-200 text-gray-900 rounded py-2 px-4 mb-16 mx-auto'}>
         <span style={{display: status}} id="status" aria-hidden="true"></span>
         {status}
       </button>
 
-      <div className={'flex w-full gap-2 content-center justify-center'} >
+      <div className={'flex w-full gap-8 content-center justify-center'}>
         <div className={'flex flex-col w-4/12'}>
           <h5 className={'text-2xl font-bold mt-4'}>Upload Dataset</h5>
           <div>
@@ -110,18 +103,23 @@ function App() {
         <div className={'flex flex-col w-4/12 gap-2'}>
           <h5 className={'text-2xl font-bold mt-4'}>User Dataset</h5>
           <textarea id="user_data" className={"p-4 rounded-2xl bg-white border-2 border-gray-200"} rows={10}/>
-          <button className={'button button--primary bg-blue-700 text-white rounded py-2 px-4 m-2'} onClick={() => {
-            const data = document.getElementById('user_data') as HTMLTextAreaElement
-            updateWorkerModel(parseFileData(data.value))
-            setStatus('Custom dataset loaded')
-          }}>
+          <button className={'button button--primary bg-blue-700 text-white rounded py-2 px-4 m-2'}
+                  onClick={() => {
+                    const data = document.getElementById('user_data') as HTMLTextAreaElement
+                    updateWorkerModel(parseFileData(data.value))
+                    setStatus('Custom dataset loaded')
+                  }}>
             Parse custom dataset
           </button>
         </div>
 
         <div className={'flex flex-col w-4/12 gap-2'}>
           <h5 className={'text-2xl font-bold mt-4'}>Parsed Dataset</h5>
-          <textarea id="parsed_data" className={"p-4 rounded-2xl"} rows={10} style={{display: 'block'}} disabled
+          <textarea id="parsed_data"
+                    className={"p-4 rounded-2xl"}
+                    rows={10}
+                    style={{display: 'block'}}
+                    disabled
                     value={JSON.stringify(words, null, 2) ?? 'no data'}
           />
         </div>
