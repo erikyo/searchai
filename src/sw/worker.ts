@@ -1,13 +1,12 @@
-import { cleanupOutdatedCaches, createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching';
+import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
 import { clientsClaim } from 'workbox-core';
-import { registerRoute, NavigationRoute } from 'workbox-routing';
 import * as USE from "universal-sentence-encoder-alt";
 import {aiPredict} from "../ml/process.ts";
 
 declare let self: ServiceWorkerGlobalScope
 
 // Load the Universal Sentence Encoder model
-let useModel: USE.UniversalSentenceEncoder | null = null;
+let model: USE.UniversalSentenceEncoder | null = null;
 
 // Clean old assets
 cleanupOutdatedCaches();
@@ -19,18 +18,13 @@ let allowlist: undefined | RegExp[]
 if (import.meta.env.DEV)
   allowlist = [/^\/$/]
 
-// To allow work offline
-registerRoute(new NavigationRoute(
-  createHandlerBoundToURL('index.html'),
-  { allowlist },
-))
 
 // Note: You might want to adjust the model loading strategy
 // to make it more efficient in a service worker context.
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    USE.load().then((model) => {
-      useModel = model;
+    USE.load().then((USEmodel) => {
+      model = USEmodel;
     })
   );
 });
@@ -50,8 +44,8 @@ self.addEventListener('message', async (event) => {
 
   // Handle the model initialization
   if (type === "init") {
-    if (useModel) {
-      await useModel.embed(event.data.words);
+    if (model) {
+      await model.embed(event.data.words);
       results = { newDataset: event.data.words };
     } else {
       results = { error: 'Model not loaded' };
@@ -61,14 +55,14 @@ self.addEventListener('message', async (event) => {
   if (type === "predict") {
     const { value, words, threshold } = event.data;
 
-    if (useModel) {
+    if (model) {
       // Assume aiPredict function is defined here or imported
-      results = await aiPredict(value, words, useModel, threshold);
+      results = await aiPredict(value, words, model, threshold);
     } else {
       results = { error: 'Model not loaded' };
     }
   }
 
   // Post the results back to the main thread
-  return { type, results }
+ event.source?.postMessage({ id: event.data.id, results: results })
 });

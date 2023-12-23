@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import {Upload} from "./components/fileinput.tsx";
 import {parseFileData} from "./ml/utils.ts";
 import {useRegisterSW} from "virtual:pwa-register/react";
@@ -7,40 +7,51 @@ function App() {
   const [predictions, setPredictions] = useState([])
   const [words, setWords] = useState([])
   const [status, setStatus] = useState('ready')
-  const [SW, setSW] = useState()
+  const [SW, setSW] = useState<ServiceWorker>()
 
 // Register the custom service worker
   useRegisterSW({
     onNeedRefresh() {
       setStatus('✳️ Refreshing service worker')
     },
+    onRegisterError(error) {
+      setStatus('❌ Error during service worker registration: ' + error)
+    },
     onRegisteredSW(swUrl, registration) {
+      console.log( 'Service worker registered: ' + swUrl)
       if (registration?.active) {
         setSW(registration.active)
-
-        // Handle messages from the service worker
-        SW.addEventListener('message', (event) => {
-          const {type, results} = event.data;
-
-          if (type === 'predictionResult') {
-            setPredictions(event.data.results.predictions)
-          } else if (type === 'modelUpdate') {
-            console.log('Model updated')
-          }
-        });
       }
     },
   })
 
+  useEffect( () => {
+    // Handle messages from the service worker
+    if (SW)
+    SW.addEventListener('message', (event) => {
+      const {type, results} = event.data;
+
+      if (type === 'predictionResult') {
+        setPredictions(results.predictions)
+      } else if (type === 'modelUpdate') {
+        console.log('Model updated')
+        console.log(results)
+      }
+    });
+  }, [SW])
+
 // Function to call the worker
   async function handlePrediction(value, words) {
-    const prediction = await SW.postMessage({type: "predict", value, words})
-    setPredictions(prediction.results)
+    if (SW) {
+      SW.postMessage({type: "predict", value, words})
+    }
   }
 
   async function updateWorkerModel(words) {
-    await SW.postMessage({type: "init", words})
-    setWords(words)
+    if (SW) {
+      await SW.postMessage({type: "init", words})
+      setWords(words)
+    }
   }
 
 
