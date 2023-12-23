@@ -2,10 +2,11 @@ import {useEffect, useState} from 'react'
 import {Upload} from "./components/fileinput.tsx";
 import {parseFileData} from "./ml/utils.ts";
 import {useRegisterSW} from "virtual:pwa-register/react";
+import ReloadPrompt from "./components/ReloadPrompt.tsx";
 
 function App() {
   const [predictions, setPredictions] = useState([])
-  const [words, setWords] = useState([])
+  const [words, setWords] = useState<string[]>([])
   const [status, setStatus] = useState('ready')
   const [SW, setSW] = useState<ServiceWorker>()
 
@@ -18,36 +19,41 @@ function App() {
       setStatus('❌ Error during service worker registration: ' + error)
     },
     onRegisteredSW(swUrl, registration) {
-      console.log( 'Service worker registered: ' + swUrl)
+      console.log('Service worker registered: ' + swUrl);
       if (registration?.active) {
-        setSW(registration.active)
+        navigator.serviceWorker.addEventListener("message", handleMessage);
+        setSW(registration.active);
       }
-    },
+    }
   })
 
-  useEffect( () => {
-    // Handle messages from the service worker
-    if (SW)
-    SW.addEventListener('message', (event) => {
-      const {type, results} = event.data;
 
-      if (type === 'predictionResult') {
-        setPredictions(results.predictions)
-      } else if (type === 'modelUpdate') {
-        console.log('Model updated')
-        console.log(results)
+  function handleMessage(event) {
+    const {type, results} = event.data;
+
+    if (type === "predict") {
+      setPredictions(results);
+    } else if (type === 'init') {
+      console.log(`Model updated`, results);
+      setStatus('model updated')
+    }
+
+    // Remember to remove the event listener when the component unmounts or SW changes
+    return () => {
+      if (SW) {
+        SW.removeEventListener('message', handleMessage);
       }
-    });
-  }, [SW])
+    };
+  }
 
 // Function to call the worker
-  async function handlePrediction(value, words) {
+  async function handlePrediction(value: string, words: any[]) {
     if (SW) {
-      SW.postMessage({type: "predict", value, words})
+      SW.postMessage({type: "predict", value, words, threshold: 0.5})
     }
   }
 
-  async function updateWorkerModel(words) {
+  async function updateWorkerModel(words: string[]) {
     if (SW) {
       await SW.postMessage({type: "init", words})
       setWords(words)
@@ -88,9 +94,14 @@ function App() {
 
         </div>
 
-        {predictions ? predictions.map((prediction) => <div className={'relative p-2 bg-gray-100 rounded-b-lg w-full'} style={{transition: 'opacity 0.5s', opacity: trainStatus === 'none' ? 0 : 1}}>
-          <div id="pred_labels" className={'rounded-md p-3 bg-gray-100 w-full'}> {prediction.word} (score: {prediction.score.toFixed(2)})</div>
-        </div>) : null}
+        {predictions.length > 0
+          ? predictions.map((prediction: {word: string, score: number}) => (
+            <div className={'relative p-2 bg-gray-100 rounded-b-lg w-full'}>
+              <div id="pred_labels" className={'rounded-md p-3 bg-gray-100 w-full'}>
+                {prediction.word} (score: {prediction.score.toFixed(2)})
+              </div>
+            </div>))
+          : null}
 
       </div>
 
@@ -135,7 +146,7 @@ function App() {
           />
         </div>
       </div>
-
+      <ReloadPrompt/>
     </div>
   )
 }

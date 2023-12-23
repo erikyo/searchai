@@ -1,5 +1,5 @@
-import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
-import { clientsClaim } from 'workbox-core';
+import {cleanupOutdatedCaches, precacheAndRoute} from 'workbox-precaching';
+import {clientsClaim} from 'workbox-core';
 import * as USE from "universal-sentence-encoder-alt";
 import {aiPredict} from "../ml/process.ts";
 
@@ -29,7 +29,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', () => {
   // Claim clients to ensure that updates are applied immediately
   clientsClaim()
 });
@@ -38,31 +38,32 @@ self.addEventListener('message', async (event) => {
   const type = event.data.type;
   let results = {};
 
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event.data && type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 
   // Handle the model initialization
   if (type === "init") {
-    if (model) {
-      await model.embed(event.data.words);
-      results = { newDataset: event.data.words };
-    } else {
-      results = { error: 'Model not loaded' };
+    if (!model) {
+      model = await USE.load();
     }
+    await model.embed(event.data.words);
+    results = {result: {dataset: event.data.words}};
   }
 
   if (type === "predict") {
-    const { value, words, threshold } = event.data;
+    const {value, words, threshold, id} = event.data;
 
     if (model) {
       // Assume aiPredict function is defined here or imported
       results = await aiPredict(value, words, model, threshold);
     } else {
-      results = { error: 'Model not loaded' };
+      results = {error: 'Model not loaded'};
     }
   }
 
+  console.log(results);
+
   // Post the results back to the main thread
- event.source?.postMessage({ id: event.data.id, results: results })
+  event.source?.postMessage({type, results})
 });
