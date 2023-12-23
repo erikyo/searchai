@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 import {Upload} from "./components/fileinput.tsx";
 import {parseFileData} from "./ml/utils.ts";
 import {useRegisterSW} from "virtual:pwa-register/react";
@@ -28,7 +28,7 @@ function App() {
   })
 
 
-  function handleMessage(event) {
+  function handleMessage(event: { data: { type: any; results: any; }; }) {
     const {type, results} = event.data;
 
     if (type === "predict") {
@@ -41,7 +41,7 @@ function App() {
     // Remember to remove the event listener when the component unmounts or SW changes
     return () => {
       if (SW) {
-        SW.removeEventListener('message', handleMessage);
+        navigator.serviceWorker.removeEventListener('message', handleMessage );
       }
     };
   }

@@ -1,11 +1,16 @@
 import * as USE from "universal-sentence-encoder-alt";
 import { cosineSimilarity } from './utils';
 
+interface Prediction {
+  word: string;
+  score: number;
+}
+
 export async function aiPredict(value: string, words: string[], model: USE.UniversalSentenceEncoder, threshold = 0.7) {
   // Split the value into words
   const valueWords = value.split(' ');
 
-  let totalGoodMatches = [];
+  let totalGoodMatches: Prediction[] = [];
 
   for (const valueWord of valueWords) {
     // Filter words to reduce the number to process
@@ -47,7 +52,7 @@ export async function aiPredict(value: string, words: string[], model: USE.Unive
   }
 
   // Aggregate scores for the same word and sort the matches by score in descending order
-  const scoreMap = totalGoodMatches.reduce((acc, match) => {
+  const scoreMap = totalGoodMatches.reduce((acc: Record<string, number>, match: Prediction) => {
     acc[match.word] = (acc[match.word] || 0) + match.score;
     return acc;
   }, {});
@@ -55,5 +60,4 @@ export async function aiPredict(value: string, words: string[], model: USE.Unive
   const aggregatedGoodMatches = Object.entries(scoreMap).map(([word, score]) => ({ word, score }));
   aggregatedGoodMatches.sort((a, b) => b.score - a.score);
 
-  return aggregatedGoodMatches.slice(0, 5);
-}
+  return aggregatedGoodMatches.slice(0, 5);}

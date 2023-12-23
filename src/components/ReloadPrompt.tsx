@@ -1,4 +1,3 @@
-import React from 'react'
 import './ReloadPrompt.css'
 
 import { useRegisterSW } from 'virtual:pwa-register/react'

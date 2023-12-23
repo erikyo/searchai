@@ -14,6 +14,7 @@ cleanupOutdatedCaches();
 // self.__WB_MANIFEST is the default injection point
 precacheAndRoute(self.__WB_MANIFEST)
 
+// @ts-ignore
 let allowlist: undefined | RegExp[]
 if (import.meta.env.DEV)
   allowlist = [/^\/$/]
@@ -52,7 +53,7 @@ self.addEventListener('message', async (event) => {
   }
 
   if (type === "predict") {
-    const {value, words, threshold, id} = event.data;
+    const {value, words, threshold} = event.data;
 
     if (model) {
       // Assume aiPredict function is defined here or imported
