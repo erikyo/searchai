@@ -1,7 +1,7 @@
 import React, {useRef} from "react";
 import {parseFileData} from "../ml/utils.ts";
 
-export function Upload({ uploadCallback }: { uploadCallback: Function }) {
+export function Upload({ uploadCallback }: { uploadCallback: () => void }) {
   const fileRef  = useRef<HTMLInputElement>(null);
 
   const readFile = (event: React.ChangeEvent<HTMLInputElement>) => {

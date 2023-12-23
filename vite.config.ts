@@ -1,8 +1,10 @@
-import { defineConfig } from 'vite'
-import { VitePWA } from 'vite-plugin-pwa'
+import {defineConfig} from 'vite'
+import {VitePWA} from 'vite-plugin-pwa'
+
+const basePath = "/searchai/";
 
 export default defineConfig({
-  base: "/searchai/",
+  base: basePath,
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
@@ -17,7 +19,7 @@ export default defineConfig({
       injectManifest: {
         globPatterns: ['**/*.{js,css,html}'],
       },
-      includeAssets: ['index.html','favicon.ico', 'apple-touch-icon.png', 'pwa-maskable-192x192.png'],
+      includeAssets: ['index.html', 'favicon.ico', 'apple-touch-icon.png', 'pwa-maskable-192x192.png'],
       manifest: {
         name: 'My Awesome App',
         short_name: 'MyApp',
@@ -27,25 +29,25 @@ export default defineConfig({
         background_color: "#FFFFFF",
         icons: [
           {
-            src: "/pwa-192x192.png",
+            src: basePath + "pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "any"
           },
           {
-            src: "/pwa-512x512.png",
+            src: basePath + "pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any"
           },
           {
-            src: "/pwa-maskable-192x192.png",
+            src: basePath + "pwa-maskable-192x192.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "maskable"
           },
           {
-            src: "/pwa-maskable-512x512.png",
+            src: basePath + "pwa-maskable-512x512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable"
