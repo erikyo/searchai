@@ -63653,7 +63653,7 @@ async function H8(n, e, t, s = 0.7) {
 }
 let uo = null;
 uN();
-dN([{"revision":null,"url":"assets/index-8TMdT8Ei.css"},{"revision":null,"url":"assets/index-O-37I6vH.js"},{"revision":null,"url":"assets/workbox-window.prod.es5-prqDwDSL.js"},{"revision":"29d13b91b9a4f2943ceecde25a4f9990","url":"index.html"},{"revision":"712f4bda1e2068328377cd50c95ba90f","url":"favicon.ico"},{"revision":"e7957c7ab745098e13459dd19ecd7fdc","url":"apple-touch-icon.png"},{"revision":"9cbfb9f381663ee3954ff975c6132323","url":"pwa-maskable-192x192.png"},{"revision":"55b31b3892123e906c126c47dbc4c143","url":"pwa-192x192.png"},{"revision":"7b738ec617863f37347d85a9bad1da42","url":"pwa-512x512.png"},{"revision":"acc510991e27401c0d551bfed0d3b16d","url":"pwa-maskable-512x512.png"},{"revision":"1bb4c7302dd4a5cfe192e027ea45aca8","url":"manifest.webmanifest"}]);
+dN([{"revision":null,"url":"assets/index-8TMdT8Ei.css"},{"revision":null,"url":"assets/index-O-37I6vH.js"},{"revision":null,"url":"assets/workbox-window.prod.es5-prqDwDSL.js"},{"revision":"29d13b91b9a4f2943ceecde25a4f9990","url":"index.html"},{"revision":"712f4bda1e2068328377cd50c95ba90f","url":"favicon.ico"},{"revision":"e7957c7ab745098e13459dd19ecd7fdc","url":"apple-touch-icon.png"},{"revision":"9cbfb9f381663ee3954ff975c6132323","url":"pwa-maskable-192x192.png"},{"revision":"397655b90b502be9ce945bd5b8831d15","url":"manifest.webmanifest"}]);
 self.addEventListener("install", (n) => {
   n.waitUntil(
     m0().then((e) => {
