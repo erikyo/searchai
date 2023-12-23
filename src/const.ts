@@ -10,7 +10,7 @@ export const setStatus = (currentStatus: string) => {
   status = currentStatus
 }
 
-export const delimiters: string[] = ['\r\n', '\r', ',', '\t', ' ']
+export const delimiters: string[] = [' ','\r\n', '\r', ',', '\t']
 
 
 /**

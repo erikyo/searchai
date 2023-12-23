@@ -1,0 +1,47 @@
+Unlock the power of ISO codes with our lightweight and high-performance ISO-to-language converter module. This meticulously crafted package seamlessly transforms ISO country and language codes into meaningful country names ensuring you have all the essentials without unnecessary bloat.
+
+Key Features:
+🚀 Performance-Driven: Engineered with speed in mind the package boasts swift execution for seamless integration into your projects.
+
+📦 Minimal Footprint: Weighing less than 10kb gzipped no dependencies it keeps your project light without compromising on functionality.
+
+🎯 Focused Functionality: From validating ISO codes to formatting languages and countries our module provides a suite of versatile utility functions for your language-related tasks.
+
+📒 Well-Defined Types: Utilizes TypeScript for well-documented and type-safe development.
+
+✅ Tested: Comprehensive Jest tests with 100% coverage to ensure reliability.
+
+Installation
+Install the module using npm:
+
+npm install ISOToLanguage
+Importing
+This module is provided as UMD so you can easily
+
+Common JS (require):
+
+const ITL = require('ISOToLanguage');
+console.log(ITL.getAll());
+ESM import:
+
+import ITL from 'ISOToLanguage';
+// or
+import { getCountry getAll } from 'ISOToLanguage';
+Usage
+isValidCountry Validates ISO codes for countries.
+
+isValidLanguage Validates ISO codes for languages.
+
+isoFormat Formats language and country into a single string.
+
+getCountryData Retrieves country data by locale isoFormat or language code.
+
+isoTL Retrieves data by ISO code and a specific type.
+
+getCountry Retrieves country data by name.
+
+getcountriesbylanguage Returns countries that speak any of the given languages.
+
+getaskey Generates a new object with keys derived from specified fields.
+
+getKeyValue Generates an array with the given key value combination.
